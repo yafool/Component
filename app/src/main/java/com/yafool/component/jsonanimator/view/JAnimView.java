@@ -18,8 +18,6 @@ package com.yafool.component.jsonanimator.view;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -63,9 +61,7 @@ public class JAnimView extends ImageView implements AnimDrawable.AnimatorDrawabl
     private Context mContext;
     private Handler mParseHandler;
     private OnJsonAnimListener mListener;
-    private BitmapDrawable bgDrawable;
     private AnimDrawable mAnimDrawable;
-    private Drawable mDefautBgDrawable;
     
     private static final int MSG_WHAT_CREATE = 111;
     private static final int MSG_WHAT_NOTIFY_END = 112;
@@ -285,11 +281,6 @@ public class JAnimView extends ImageView implements AnimDrawable.AnimatorDrawabl
                 super.handleMessage(msg);
                 switch (msg.what) {
                     case MSG_WHAT_CREATE: {
-                        if (null == bgDrawable) {
-                            setBackground(mDefautBgDrawable);
-                        } else {
-                            setBackground(bgDrawable);
-                        }
                         setImageDrawable(mAnimDrawable);
                         mListener.onPrepared(JAnimView.this);
                         break;
@@ -381,12 +372,6 @@ public class JAnimView extends ImageView implements AnimDrawable.AnimatorDrawabl
             }
 
             String dir = file.getParent();
-            // background path [Building]
-//            BackgroundBean bgBean = drawableBean.getBackground();
-//            if (null != bgBean && !TextUtils.isEmpty(bgBean.getRes())) {
-//                bgBean.setRes(dir + File.separatorChar + bgBean.getRes());
-//            }
-            // layer path [Building]
             for (LayerBean bean : layers) {
                 String[] ress = bean.getRess();
                 if (null == ress || 0 >= ress.length) {
@@ -405,39 +390,6 @@ public class JAnimView extends ImageView implements AnimDrawable.AnimatorDrawabl
 
         return drawableBean;
     }
-
-//    private BitmapDrawable buildBackgroundDrawable(BackgroundBean bgBean) {
-//        BitmapDrawable drawable = null;
-//        if (null != bgBean && !TextUtils.isEmpty(bgBean.getRes())) {
-//
-//            switch (AnimatorConfig.Properties.valueOf(bgBean.getScan())) {
-//                case horizontal: {
-//                    Bitmap bmp = ImageLoader.getInstance().getBitmap(bgBean.getRes(), 0, getHeight());
-//                    drawable = new BitmapDrawable(getResources(), bmp);
-//                    drawable.setTargetDensity(bmp.getDensity());
-//                    drawable.setTileModeX(Shader.TileMode.REPEAT);
-//                    break;
-//                }
-//                case vertical: {
-//                    Bitmap bmp = ImageLoader.getInstance().getBitmap(bgBean.getRes(), getWidth(), 0);
-//                    drawable = new BitmapDrawable(getResources(), bmp);
-//                    drawable.setTargetDensity(bmp.getDensity());
-//                    drawable.setTileModeY(Shader.TileMode.REPEAT);
-//                    break;
-//                }
-//                case fit:
-//                default: {
-//                    Bitmap bmp = ImageLoader.getInstance().getBitmap(bgBean.getRes(), 0, 0);
-//                    drawable = new BitmapDrawable(getResources(), bmp);
-//                    break;
-//                }
-//            }
-//        }
-//
-//        return drawable;
-//    }
-
-
 
 
     /**

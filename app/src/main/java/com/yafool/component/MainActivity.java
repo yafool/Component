@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         try {
-            mJAnimView.setDataSource("/sdcard/animator/anim.json");
+            mJAnimView.setDataSource("file:///android_asset/dance_emoji/dance_emoji.animator");
         } catch (FileNotFoundException e) {
             YafoolLog.e(TAG, Log.getStackTraceString(e));
         } catch (NullPointerException e) {

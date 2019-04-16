@@ -86,14 +86,11 @@ public class AnimDrawable extends LayerDrawable  implements BaseDrawable.OnDrawL
         for (LayerBean bean : layers) {
             BaseDrawable drawable = null;
             switch (AnimConstant.LayerType.valueOf(bean.getType())) {
+                case background: {
+                    drawable = new BackgroundDrawable(context, bean);
+                    break;
+                }
                 case frame: {
-                    /**
-                     * ota2 版本中, 会触发两次frame的draw, 导致速度快了两倍.
-                     * 解决这个问题后, 用版本号对已发的包做兼容.
-                     * */
-                    if ("1.0".equals(mDrawableBean.getV())) {
-                        bean.setSpeed(bean.getSpeed() / 2);
-                    }
                     drawable = new FrameDrawable(context, bean);
                     break;
                 }

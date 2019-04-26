@@ -28,10 +28,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.LruCache;
 import android.widget.ImageView;
 
 
+import com.yafool.component.imageloader.cache.BitmapCache;
 import com.yafool.component.utils.Constants;
 
 import java.io.File;
@@ -57,7 +57,7 @@ public class ImageLoader {
     private static final int MESSAGE_WHAT_SETIMAGE = 22;
 
     private BitmapDecode mBitmapDecode;
-    private LruCache<String, Bitmap> mLRUCache;
+    private BitmapCache mBitmapCache;
     private Handler mHandler;
 
     private LoadHolder mLoadLoadHolder;
@@ -66,12 +66,7 @@ public class ImageLoader {
 
     private ImageLoader() {
         int cacheSize = (int) (Runtime.getRuntime().maxMemory() >> 12);
-        mLRUCache = new LruCache<String, Bitmap>(cacheSize) {
-            @Override
-            protected int sizeOf(String key, Bitmap value) {
-                return value.getAllocationByteCount() >> 10;
-            }
-        };
+        mBitmapCache = new BitmapCache(cacheSize);
 
         mBitmapDecode = new BitmapDecode();
         mLoadLoadHolder = new LoadHolder();
@@ -131,7 +126,7 @@ public class ImageLoader {
             throw new NullPointerException("path is invalid! path: " + path);
         }
 
-        Bitmap bmp = mLRUCache.get(Md5.stringMD5(path));
+        Bitmap bmp = mBitmapCache.get(Md5.stringMD5(path));
         if (null == bmp) {
             ThreadPool.getInstance().addExecuteTask(new Runnable() {
                 @Override
@@ -171,7 +166,7 @@ public class ImageLoader {
         final int viewHeight = imageView.getHeight();
 
         final String key = TextUtils.isEmpty(path) ? ctx.getResources().getResourceName(defRes) : Md5.stringMD5(path);
-        final Bitmap bmp = mLRUCache.get(key);
+        final Bitmap bmp = mBitmapCache.get(key);
         if (null == bmp) {
             ThreadPool.getInstance().addExecuteTask(new Runnable() {
                 @Override
@@ -193,7 +188,7 @@ public class ImageLoader {
                         }
 
                         if (null != tmpBmp) {
-                            mLRUCache.put(key, tmpBmp);
+                            mBitmapCache.put(key, tmpBmp);
                             updateImageView(imageView, tmpBmp);
                         }
                     }
@@ -238,7 +233,7 @@ public class ImageLoader {
 
                         Bitmap bmp = mBitmapDecode.toBitmap(context, path, width, height);
                         if (bmp != null) {
-                            mLRUCache.put(Md5.stringMD5(path), bmp);
+                            mBitmapCache.put(Md5.stringMD5(path), bmp);
                         }
                     }
 
@@ -273,7 +268,7 @@ public class ImageLoader {
             throw new NullPointerException("path is invalid! path: " + path);
         }
 
-        return mLRUCache.get(Md5.stringMD5(path));
+        return mBitmapCache.get(Md5.stringMD5(path));
     }
 
     /**
@@ -292,7 +287,7 @@ public class ImageLoader {
         }
 
         final String key = Md5.stringMD5(path);
-        if (null != mLRUCache.get(key)) {
+        if (null != mBitmapCache.get(key)) {
             return;
         }
 
@@ -309,7 +304,7 @@ public class ImageLoader {
 
                     Bitmap bmp = mBitmapDecode.toBitmap(context, path, width, height);
                     if (bmp != null) {
-                        mLRUCache.put(Md5.stringMD5(path), bmp);
+                        mBitmapCache.put(Md5.stringMD5(path), bmp);
                         mLoadLoadHolder.remove(path);
                     }
 
@@ -338,7 +333,7 @@ public class ImageLoader {
         }
 
         final String key = Md5.stringMD5(path);
-        Bitmap bmp = mLRUCache.get(key);
+        Bitmap bmp = mBitmapCache.get(key);
         if (null == bmp) {
             try {
                 bmp = mBitmapDecode.toBitmap(context, path, width, height);
@@ -351,7 +346,7 @@ public class ImageLoader {
             Log.e(TAG, String.format("%s no cache and can't decode by BitmapFactory"));
             return null;
         } else {
-            mLRUCache.put(key, bmp);
+            mBitmapCache.put(key, bmp);
             return bmp;
         }
     }
